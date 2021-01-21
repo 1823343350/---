@@ -1,0 +1,155 @@
+// 1migong.cpp : Defines the entry point for the console application.
+//
+//迷宫问题求解
+#include "stdafx.h"
+#include "stdlib.h"
+void create(int a[7][7]);
+void solve(int a[7][7],struct line *l);
+void solveingmaze(int a[7][7],int z1,int z2,struct line *l);
+
+struct line{
+	int s1;
+	int s2;
+	struct line *next;
+	struct line *front;
+};
+
+int main(int argc, char* argv[])
+{
+	int a[7][7]={0};
+	int i,k;
+	struct line *l;
+	struct line *Head;
+	Head=(struct line *)malloc(sizeof(struct line));
+	l=Head;
+	l->s1=7;
+	l->s2=7;
+	a[7][7]=-9;
+	l->next=NULL;
+	l->front=NULL;
+
+	printf("创建迷宫(0=障碍,1=通路,2=入口,3=出口):\n");
+	create(a);
+
+	solve(a,l);
+	printf("\n");		
+	for(i=1;i<=5;i++)
+	{
+		for(k=1;k<=5;k++)
+			printf("%d ",a[i][k]);
+		printf("\n");
+	}
+
+//	system("pause");
+	
+	printf("开始:");
+	if(Head->next==NULL)
+		printf("迷宫无解!\n");
+	else
+	{
+		l=Head->next;
+		while(l!=NULL)
+		{
+			printf("(%d %d)->",l->s1,l->s2);
+			l=l->next;
+		}
+	}
+
+	printf("结束\n");
+	system("pause");
+
+	return 0;
+}
+
+void create(int a[7][7])
+{
+	int i,k;
+
+	for(i=1;i<=5;i++)
+		for(k=1;k<=5;k++)
+			scanf("%d",&a[i][k]);
+
+}
+
+void solve(int a[7][7],struct line *l)
+{
+	int i,k,z1,z2,m1,m2;
+	
+	for(i=1;i<=5;i++)
+		for(k=1;k<=5;k++)
+		{
+			if(a[i][k]==2)
+			{
+				z1=i;
+				z2=k;
+			}
+			if(a[i][k]==3)
+			{
+				m1=i;
+				m2=k;
+			}
+		}
+
+	printf("入口:%d %d\n出口:%d %d\n",z1,z2,m1,m2);
+	a[z1][z2]=1;
+	solveingmaze(a,z1,z2,l);
+}
+
+void solveingmaze(int a[7][7],int z1,int z2,struct line *l)//(迷宫,当前位置,链表(都是先行在列))
+{
+	do
+	{
+	if((a[z1][z2]==1) || (a[z1][z2]==3))
+	{
+		struct line *q;
+		q=(struct line *)malloc(sizeof(struct line));
+		q->front=l;
+		q->next=NULL;
+		l->next=q;
+		l=q;
+		q->s1=z1;
+		q->s2=z2;
+		if(a[z1][z2]==3)
+			break;
+		else
+			a[z1][z2]=-1;
+	}
+	else
+	{
+			if((a[z1][z2+1]==1) || (a[z1][z2+1]==3))
+		{
+		//	printf("R");//调试用
+			z2++;
+		}
+		else if((a[z1+1][z2]==1) || (a[z1+1][z2]==3))
+		{
+		//	printf("X");//调试用
+			z1++;
+		}
+		else if((a[z1][z2-1]==1) || (a[z1][z2-1]==3))
+		{
+		//	printf("Z");//调试用
+			z2--;
+		}
+		else if((a[z1-1][z2]==1) || (a[z1-1][z2+1]==3))
+		{
+		//	printf("S");//调试用
+			z1--;
+		}
+		else
+		{
+		//	printf("死路\n");//调试用
+			a[l->s1][l->s2]=-1;
+			l=l->front;
+			l->next=NULL;
+			if(a[l->s1][l->s2]==-9)
+				break;
+			else
+			{
+				z1=l->s1;
+				z2=l->s2;
+			}
+		}
+	}
+	}while((l!=NULL));
+}
